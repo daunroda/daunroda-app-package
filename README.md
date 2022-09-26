@@ -25,66 +25,7 @@ bullshit from YouTube (karaoke/instrumental versions, music video versions etc)
 
 ## Usage
 
-1. As a CLI app:
-
-- Open a terminal
-- Run `npm install --global daunroda`
-- Run `daunroda` (it's recommended to run it on the partition you want to
-  download music to when running for the first time, unless you want to manually
-  edit the config file afterwards)
-
-2. As package:
-
-- `npm i daunroda` or `yarn add daunroda`
-- In JavaScript:
-
-```js
-const { Daunroda } = require("daunroda");
-const daunroda = new Daunroda({
-  spotifyClientID:
-    "fillMe (https://developer.spotify.com/dashboard/applications)",
-  spotifySecret:
-    "fillMe (https://developer.spotify.com/dashboard/applications)",
-  downloadTo: "./downloads",
-  audioContainer: "mp3 | flac",
-  // only applies to mp3
-  audioBitrate: 320,
-  // any number, really, used to check what the difference between the Spotify version and YouTube Music version is in length, and if it's higher than the percentage specified here it will be skipped
-  difference: 10,
-  // whether to automatically allow the downloading of songs that contain forbidden wording on YouTube (such as live, karaoke, instrumental etc), if disabled you will be prompted if you want to download anyway or not
-  allowForbiddenWording: false,
-  playlists: ["spotify", "playlist", "ids", "go", "here"]
-});
-
-daunroda.on("info", console.info);
-daunroda.on("error", console.error);
-daunroda.run().catch(console.error);
-```
-
-- In TypeScript:
-
-```ts
-import { Daunroda } from "daunroda";
-const daunroda = new Daunroda({
-  spotifyClientID:
-    "fillMe (https://developer.spotify.com/dashboard/applications)",
-  spotifySecret:
-    "fillMe (https://developer.spotify.com/dashboard/applications)",
-  downloadTo: "./downloads",
-  audioContainer: "mp3 | flac",
-  // only applies to mp3
-  audioBitrate: 320,
-  // any number, really, used to check what the difference between the Spotify version and YouTube Music version is in length, and if it's higher than the percentage specified here it will be skipped
-  difference: 10,
-  // whether to automatically allow the downloading of songs that contain forbidden wording on YouTube (such as live, karaoke, instrumental etc), if disabled you will be prompted if you want to download anyway or not
-  allowForbiddenWording: false,
-  playlists: ["spotify", "playlist", "ids", "go", "here"]
-});
-
-daunroda.on("info", console.info);
-daunroda.on("error", console.error);
-daunroda.run().catch(console.error);
-```
+- `npm i daunroda/daunroda-app-package` or `yarn add daunroda/daunroda-app-package`
 
 ## Contributors
 

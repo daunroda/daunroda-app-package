@@ -1,18 +1,8 @@
 import { Stopwatch } from "@sapphire/stopwatch";
 import { jaroWinkler } from "@skyra/jaro-winkler";
-import cliProgress from "cli-progress";
-import {
-  blackBright,
-  blueBright,
-  cyan,
-  cyanBright,
-  greenBright,
-  yellowBright
-} from "colorette";
 import ffmpegPath from "ffmpeg-static";
 import ffmpeg from "fluent-ffmpeg";
-import inquirer from "inquirer";
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
@@ -24,9 +14,6 @@ import ytdl, { getBasicInfo } from "ytdl-core";
 import type { Daunroda } from "./Daunroda";
 import { ensureDir, exists } from "./fs-utils";
 import type { Processed } from "./Spotify";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const hyperlinker = require("hyperlinker");
 
 ffmpeg.setFfmpegPath(ffmpegPath!);
 
@@ -85,18 +72,14 @@ export class YouTube {
       const notFound: Set<string> = new Set();
       const songs: string[] = [];
 
-      const progress = new cliProgress.SingleBar(
-        {
-          format: `Downloading ${blackBright(
-            hyperlinker(playlist.name, playlist.url)
-          )} [{bar}] ${greenBright("{percentage}%")} | ETA: ${yellowBright(
-            "{eta}s"
-          )} | ${blueBright("{value}/{total}")}`
-        },
-        cliProgress.Presets.legacy
-      );
+      let downloaded = 0;
 
-      progress.start(playlist.songs.length, 0);
+      this.daunroda.emit("progress", {
+        playlist: playlist.name,
+        downloaded,
+        total: playlist.songs.length,
+        finished: false
+      });
 
       this.stopwatch.restart();
       for (const song of playlist.songs) {
@@ -114,7 +97,15 @@ export class YouTube {
         if (await exists(destination)) {
           songs.push(name);
           this.daunroda.emit("debug", `"${name}" is already downloaded.`);
-          progress.increment();
+
+          downloaded++;
+          this.daunroda.emit("progress", {
+            playlist: playlist.name,
+            downloaded,
+            total: playlist.songs.length,
+            finished: false
+          });
+
           continue;
         }
 
@@ -147,14 +138,22 @@ export class YouTube {
           result.id!,
           destination,
           track,
-          progress
+          playlist.name,
+          playlist.songs.length,
+          downloaded
         );
         promises.push(promise);
       }
 
       await Promise.all(promises);
 
-      progress.stop();
+      this.daunroda.emit("progress", {
+        playlist: playlist.name,
+        downloaded,
+        total: playlist.songs.length,
+        finished: true
+      });
+
       this.stopwatch.stop();
 
       const m3u8 = songs
@@ -177,77 +176,69 @@ export class YouTube {
       this.daunroda.emit(
         "info",
         songsNotFound
-          ? `Found and downloaded ${cyanBright(
-              playlist.songs.length - songsNotFound
-            )}/${cyanBright(
+          ? `Found and downloaded ${playlist.songs.length - songsNotFound}/${
               playlist.songs.length
-            )} songs from the "${blackBright(
-              hyperlinker(playlist.name, playlist.url)
-            )}" playlist in ${cyan(this.stopwatch.toString())}!\n`
-          : `Found and downloaded all songs (${cyanBright(
+            } songs from the "${
+              playlist.name
+            }" playlist in ${this.stopwatch.toString()}!\n`
+          : `Found and downloaded all songs (${
               playlist.songs.length
-            )}) from the "${blackBright(
-              hyperlinker(playlist.name, playlist.url)
-            )}" playlist in ${cyan(this.stopwatch.toString())}!\n`
+            }) from the "${
+              playlist.name
+            }" playlist in ${this.stopwatch.toString()}!\n`
       );
     }
 
     for (const download of this.downloadMaybe) {
       if (await exists(download.destination)) continue;
-      const { answer }: { answer: boolean } = await inquirer.prompt({
-        type: "confirm",
-        name: "answer",
-        default: false,
-        message: `\nFound ${cyanBright(
-          download.name
-        )} on YouTube (named ${cyanBright(
-          download.res.name ?? download.res.title ?? ""
-        )}) but it was rejected because of ${
-          download.reason
-        }. Do you want to download ${hyperlinker(
-          yellowBright("this"),
-          `https://music.youtube.com/watch?v=${download.res.id}`
-        )} anyway?`
-      });
+      // const { answer }: { answer: boolean } = await inquirer.prompt({
+      //   type: "confirm",
+      //   name: "answer",
+      //   default: false,
+      //   message: `\nFound ${download.name} on YouTube (named ${
+      //     download.res.name ?? download.res.title ?? ""
+      //   }) but it was rejected because of ${
+      //     download.reason
+      //   }. Do you want to download this https://music.youtube.com/watch?v=${
+      //     download.res.id
+      //   } anyway?`
+      // });
 
-      if (answer) {
-        const progress = new cliProgress.SingleBar(
-          {
-            format: `Downloading ${blackBright(
-              download.name
-            )} [{bar}] ${greenBright("{percentage}%")} | ETA: ${yellowBright(
-              "{eta}s"
-            )} | ${blueBright("{value}/{total}")}`
-          },
-          cliProgress.Presets.legacy
-        );
-        progress.start(1, 0);
-        await this.downloadSong(
-          download.res.id!,
-          download.destination,
-          download.track,
-          progress
-        );
+      //   if (answer) {
+      //     await this.downloadSong(
+      //       download.res.id!,
+      //       download.destination,
+      //       download.track,
+      //       download.playlist,
+      //       1,
+      //       0
+      //     );
 
-        // Add newly downloaded song to playlist file
-        let m3u8 = await readFile(
-          join(
-            this.daunroda.config.downloadTo,
-            `${sanitize(download.playlist)}.m3u8`
-          )
-        ).then((buff) => buff.toString());
-        m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
-          this.daunroda.config.audioContainer
-        }`;
-        await writeFile(
-          join(
-            this.daunroda.config.downloadTo,
-            `${sanitize(download.playlist)}.m3u8`
-          ),
-          m3u8
-        );
-        progress.stop();
-      }
+      //     // Add newly downloaded song to playlist file
+      //     let m3u8 = await readFile(
+      //       join(
+      //         this.daunroda.config.downloadTo,
+      //         `${sanitize(download.playlist)}.m3u8`
+      //       )
+      //     ).then((buff) => buff.toString());
+      //     m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
+      //       this.daunroda.config.audioContainer
+      //     }`;
+      //     await writeFile(
+      //       join(
+      //         this.daunroda.config.downloadTo,
+      //         `${sanitize(download.playlist)}.m3u8`
+      //       ),
+      //       m3u8
+      //     );
+
+      //     this.daunroda.emit("progress", {
+      //       playlist: download.playlist,
+      //       downloaded: 1,
+      //       total: 1,
+      //       finished: true
+      //     });
+      //   }
     }
   }
 
@@ -256,7 +247,9 @@ export class YouTube {
     id: string,
     destination: string,
     track: SpotifyApi.TrackObjectFull,
-    progress: cliProgress.SingleBar
+    playlist: string,
+    total: number,
+    downloaded: number
   ) {
     const audioStream = ytdl(`https://youtu.be/${id}`, {
       quality: "highestaudio",
@@ -331,7 +324,12 @@ export class YouTube {
         ff.on("end", async () => {
           if (tmpImg) await rm(tmpImg);
           await rm(tmpAudio);
-          progress.increment();
+          this.daunroda.emit("progress", {
+            playlist,
+            downloaded,
+            total,
+            finished: false
+          });
           resolve();
         });
       } catch (err) {
