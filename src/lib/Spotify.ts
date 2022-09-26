@@ -1,4 +1,3 @@
-import { red } from "colorette";
 import spotify from "spotify-web-api-node";
 import type { Daunroda } from "./Daunroda";
 
@@ -29,10 +28,7 @@ export class Spotify {
 
     for (const id of ids) {
       const playlist = await this.client.getPlaylist(id).catch(() => {
-        this.daunroda.emit(
-          "error",
-          red(`Playlist with the ID of ${id} not found.`)
-        );
+        this.daunroda.emit("error", `Playlist with the ID of ${id} not found.`);
       });
 
       if (!playlist) continue;

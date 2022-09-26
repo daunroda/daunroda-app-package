@@ -1,11 +1,7 @@
-import { blueBright, cyanBright, greenBright, yellowBright } from "colorette";
 import { EventEmitter } from "node:stream";
 import { ensureDir } from "./fs-utils";
 import { Spotify } from "./Spotify";
 import { YouTube } from "./YouTube";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const hyperlinker = require("hyperlinker");
 
 export class Daunroda extends EventEmitter {
   public config: Config;
@@ -29,19 +25,14 @@ export class Daunroda extends EventEmitter {
       this.config.playlists.length > 1 ? "playlists" : "playlist"
     }`;
 
-    this.emit(
-      "info",
-      `Processing ${greenBright(totalPlaylists)} on Spotify...`
-    );
+    this.emit("info", `Processing ${totalPlaylists} on Spotify...`);
     const processed = await spotify.processPlaylists(this.config.playlists);
 
     let fetchedTracks = 0;
     processed.map((val) => (fetchedTracks += val.songs.length));
     this.emit(
       "info",
-      `Fetched ${cyanBright(`${fetchedTracks} tracks`)} across ${greenBright(
-        totalPlaylists
-      )} on Spotify!`
+      `Fetched ${`${fetchedTracks} tracks`} across ${totalPlaylists} on Spotify!`
     );
 
     this.emit(
@@ -52,12 +43,7 @@ export class Daunroda extends EventEmitter {
 
     this.emit(
       "info",
-      `${yellowBright(
-        hyperlinker(
-          "Success!",
-          "https://www.myinstants.com/media/instants_images/boratgs.jpg"
-        )
-      )} Songs downloaded to ${blueBright(this.config.downloadTo)}.`
+      `Success! Songs downloaded to ${this.config.downloadTo}.`
     );
   }
 }

@@ -1,0 +1,45 @@
+name: Build and Push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  Build-and-Push:
+    name: Build and Push to another branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+      - name: Use Node.js v18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
+          registry-url: https://registry.yarnpkg.com/
+      - name: Set Git parameters
+        run: |
+          git config --global user.name daunrodo
+          git config --global user.email contact@daunroda.cf
+      - name: Install dependencies
+        run: yarn --immutable
+      - name: Build project
+        run: yarn build
+      - name: Clone the build branch
+        run: |
+          mkdir build
+          cd build
+          git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/daunroda/daunroda-app-package.git .
+          git checkout build
+      - name: Add files to git and commit them
+        run: |
+          rsync -r ./dist ./build 
+          rsync ./package* ./build
+          cd build
+          git add .
+          git commit -m "build: ${{ github.sha }}" || true
+      - name: Push files to GitHub
+        run: |
+            cd build
+            git push origin build || true
