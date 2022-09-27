@@ -22,5 +22,6 @@ export interface Config {
     allowForbiddenWording: boolean;
     /** An array of Spotify playlist IDs */
     playlists: string[];
+    accessToken: string;
 }
 //# sourceMappingURL=Daunroda.d.ts.map

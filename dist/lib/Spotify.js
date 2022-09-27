@@ -24,8 +24,7 @@ class Spotify {
         });
     }
     async init() {
-        const { body: { access_token } } = await this.client.clientCredentialsGrant();
-        this.client.setAccessToken(access_token);
+        this.client.setAccessToken(this.daunroda.config.accessToken);
         return this;
     }
     async processPlaylists(ids) {
