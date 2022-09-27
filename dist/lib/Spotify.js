@@ -24,36 +24,40 @@ class Spotify {
         });
         this.client.setAccessToken(this.daunroda.config.accessToken);
     }
-    async processPlaylists(ids) {
-        const processed = [];
-        for (const id of ids) {
-            const playlist = await this.client.getPlaylist(id).catch(() => {
-                this.daunroda.emit("error", `Playlist with the ID of ${id} not found.`);
-            });
-            if (!playlist)
-                continue;
-            const { name } = playlist.body;
-            const { description } = playlist.body;
-            const image = playlist.body.images[0].url;
-            const url = playlist.body.external_urls.spotify;
-            const songs = await this.getSpotifyTracks(id);
-            processed.push({ id, name, description, image, songs, url });
-        }
-        return processed;
+    processPlaylists(ids) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const processed = [];
+            for (const id of ids) {
+                const playlist = yield this.client.getPlaylist(id).catch(() => {
+                    this.daunroda.emit("error", `Playlist with the ID of ${id} not found.`);
+                });
+                if (!playlist)
+                    continue;
+                const { name } = playlist.body;
+                const { description } = playlist.body;
+                const image = playlist.body.images[0].url;
+                const url = playlist.body.external_urls.spotify;
+                const songs = yield this.getSpotifyTracks(id);
+                processed.push({ id, name, description, image, songs, url });
+            }
+            return processed;
+        });
     }
-    async getSpotifyTracks(id) {
-        const songs = [];
-        let next = true;
-        let offset = 0;
-        while (next) {
-            const { body: { items, next: nextURL } } = await this.client.getPlaylistTracks(id, { offset });
-            if (!nextURL)
-                next = false;
-            else if (nextURL)
-                offset = Number(nextURL.split("offset=")[1].split("&")[0]);
-            songs.push(...items);
-        }
-        return songs;
+    getSpotifyTracks(id) {
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            const songs = [];
+            let next = true;
+            let offset = 0;
+            while (next) {
+                const { body: { items, next: nextURL } } = yield this.client.getPlaylistTracks(id, { offset });
+                if (!nextURL)
+                    next = false;
+                else if (nextURL)
+                    offset = Number(nextURL.split("offset=")[1].split("&")[0]);
+                songs.push(...items);
+            }
+            return songs;
+        });
     }
 }
 exports.Spotify = Spotify;
