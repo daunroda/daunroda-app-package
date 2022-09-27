@@ -77,6 +77,7 @@ class YouTube {
         return this;
     }
     async processSongs(processed) {
+        var _a;
         for (const playlist of processed) {
             await (0, fs_utils_1.ensureDir)((0, path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name)));
             const promises = [];
@@ -111,7 +112,7 @@ class YouTube {
                 }
                 this.daunroda.emit("debug", `Searching for "${name}"...`);
                 const searched = await this.client.music.search(name, { type: "song" });
-                const result = searched?.results?.length
+                const result = ((_a = searched === null || searched === void 0 ? void 0 : searched.results) === null || _a === void 0 ? void 0 : _a.length)
                     ? // Find the first result that doesn't get filtered out
                         await searched.results.map((res) => this.filter(res, name, destination, track, playlist.name, notFound))[0]
                     : null;
@@ -193,12 +194,13 @@ class YouTube {
     }
     /** Downloads a song from YouTube and adds the metadata from Spotify to it */
     async downloadSong(id, destination, track, playlist, total, downloaded) {
+        var _a;
         const audioStream = (0, ytdl_core_1.default)(`https://youtu.be/${id}`, {
             quality: "highestaudio",
             highWaterMark: 1 << 25
         });
         audioStream.on("error", (err) => this.daunroda.emit("error", `There was an error whilst downloading "${track.name}" (YouTube ID: ${id}): ${err.message}`));
-        const coverUrl = track.album.images[0]?.url;
+        const coverUrl = (_a = track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url;
         let tmpImg = null;
         if (coverUrl) {
             const coverStream = await (0, undici_1.request)(coverUrl).then((res) => res.body.arrayBuffer());
@@ -245,6 +247,7 @@ class YouTube {
     }
     /** Filter out unwanted results */
     async filter(res, name, destination, track, playlist, notFound) {
+        var _a, _b, _c, _d, _e;
         if (!notFound.has(name))
             notFound.add(name);
         // Don't download age restricted songs or if you can't fet info on something
@@ -252,11 +255,11 @@ class YouTube {
         if (!info || info.videoDetails.age_restricted)
             return false;
         // If none of the artist names intersect or the titles aren't similar enough then reject this entry
-        if (!res.artists?.some((artist) => artist.name.toLowerCase() === track.artists[0].name.toLowerCase()) ||
-            (0, jaro_winkler_1.jaroWinkler)(res.title ?? res.name ?? "", track.name) < 0.85) {
+        if (!((_a = res.artists) === null || _a === void 0 ? void 0 : _a.some((artist) => artist.name.toLowerCase() === track.artists[0].name.toLowerCase())) ||
+            (0, jaro_winkler_1.jaroWinkler)((_c = (_b = res.title) !== null && _b !== void 0 ? _b : res.name) !== null && _c !== void 0 ? _c : "", track.name) < 0.85) {
             return null;
         }
-        const diff = this.difference(track.duration_ms / 1000, res.duration?.seconds ?? 0);
+        const diff = this.difference(track.duration_ms / 1000, (_e = (_d = res.duration) === null || _d === void 0 ? void 0 : _d.seconds) !== null && _e !== void 0 ? _e : 0);
         if (!this.daunroda.config.allowForbiddenWording &&
             (reject.some((rej) => res.title && res.title.toLowerCase().includes(rej)) ||
                 reject.some((rej) => res.name && res.name.toLowerCase().includes(rej)))) {
