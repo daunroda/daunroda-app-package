@@ -11,7 +11,7 @@ export class Daunroda extends EventEmitter {
   }
 
   public async run() {
-    const spotify = await new Spotify(this).init();
+    const spotify = await new Spotify(this);
     const youtube = await new YouTube(this).init();
 
     if (

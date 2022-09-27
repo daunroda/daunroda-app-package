@@ -12,12 +12,8 @@ export class Spotify {
       clientId: daunroda.config.spotifyClientID,
       clientSecret: daunroda.config.spotifySecret
     });
-  }
 
-  public async init() {
     this.client.setAccessToken(this.daunroda.config.accessToken);
-
-    return this;
   }
 
   public async processPlaylists(ids: string[]) {
