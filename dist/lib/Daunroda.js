@@ -17,7 +17,7 @@ class Daunroda extends node_stream_1.EventEmitter {
         this.config = config;
     }
     async run() {
-        const spotify = await new Spotify_1.Spotify(this).init();
+        const spotify = await new Spotify_1.Spotify(this);
         const youtube = await new YouTube_1.YouTube(this).init();
         if (this.config.audioContainer !== "mp3" &&
             this.config.audioContainer !== "flac")

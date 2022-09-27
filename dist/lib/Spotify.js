@@ -22,10 +22,7 @@ class Spotify {
             clientId: daunroda.config.spotifyClientID,
             clientSecret: daunroda.config.spotifySecret
         });
-    }
-    async init() {
         this.client.setAccessToken(this.daunroda.config.accessToken);
-        return this;
     }
     async processPlaylists(ids) {
         const processed = [];

@@ -4,7 +4,6 @@ export declare class Spotify {
     private client;
     private daunroda;
     constructor(daunroda: Daunroda);
-    init(): Promise<this>;
     processPlaylists(ids: string[]): Promise<Processed[]>;
     private getSpotifyTracks;
 }
