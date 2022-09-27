@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import type { PathLike } from "node:fs";
+import type { PathLike } from "fs";
 /**
  * Asynchronously checks if the given path exists
  * @param path The path to check for existence
