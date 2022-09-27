@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureDir = exports.exists = void 0;
-const promises_1 = require("node:fs/promises");
+const promises_1 = require("fs/promises");
 /**
  * Asynchronously checks if the given path exists
  * @param path The path to check for existence
