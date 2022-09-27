@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Daunroda = void 0;
-const node_stream_1 = require("node:stream");
+const stream_1 = require("stream");
 const fs_utils_1 = require("./fs-utils");
 const Spotify_1 = require("./Spotify");
 const YouTube_1 = require("./YouTube");
-class Daunroda extends node_stream_1.EventEmitter {
+class Daunroda extends stream_1.EventEmitter {
     constructor(config) {
         super();
         Object.defineProperty(this, "config", {

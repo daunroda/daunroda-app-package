@@ -6,9 +6,9 @@ const stopwatch_1 = require("@sapphire/stopwatch");
 const jaro_winkler_1 = require("@skyra/jaro-winkler");
 const ffmpeg_static_1 = tslib_1.__importDefault(require("ffmpeg-static"));
 const fluent_ffmpeg_1 = tslib_1.__importDefault(require("fluent-ffmpeg"));
-const promises_1 = require("node:fs/promises");
-const node_os_1 = require("node:os");
-const node_path_1 = require("node:path");
+const promises_1 = require("fs/promises");
+const os_1 = require("os");
+const path_1 = require("path");
 const sanitize_filename_1 = tslib_1.__importDefault(require("sanitize-filename"));
 const undici_1 = require("undici");
 const youtubei_js_1 = require("youtubei.js");
@@ -78,7 +78,7 @@ class YouTube {
     }
     async processSongs(processed) {
         for (const playlist of processed) {
-            await (0, fs_utils_1.ensureDir)((0, node_path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name)));
+            await (0, fs_utils_1.ensureDir)((0, path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name)));
             const promises = [];
             const notFound = new Set();
             const songs = [];
@@ -95,7 +95,7 @@ class YouTube {
                     continue;
                 const { track } = song;
                 const name = `${track.artists[0].name} - ${track.name}`;
-                const destination = (0, node_path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`);
+                const destination = (0, path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`);
                 // Skip searching and downloading if song is already downloaded
                 if (await (0, fs_utils_1.exists)(destination)) {
                     songs.push(name);
@@ -133,9 +133,9 @@ class YouTube {
             });
             this.stopwatch.stop();
             const m3u8 = songs
-                .map((name) => (0, node_path_1.join)((0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`))
+                .map((name) => (0, path_1.join)((0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`))
                 .join("\n");
-            await (0, promises_1.writeFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(playlist.name)}.m3u8`), m3u8);
+            await (0, promises_1.writeFile)((0, path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(playlist.name)}.m3u8`), m3u8);
             const songsNotFound = notFound.size;
             this.daunroda.emit("info", songsNotFound
                 ? `Found and downloaded ${playlist.songs.length - songsNotFound}/${playlist.songs.length} songs from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!\n`
@@ -202,10 +202,10 @@ class YouTube {
         let tmpImg = null;
         if (coverUrl) {
             const coverStream = await (0, undici_1.request)(coverUrl).then((res) => res.body.arrayBuffer());
-            tmpImg = (0, node_path_1.join)((0, node_os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.jpg`);
+            tmpImg = (0, path_1.join)((0, os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.jpg`);
             await (0, promises_1.writeFile)(tmpImg, Buffer.from(coverStream));
         }
-        const tmpAudio = (0, node_path_1.join)((0, node_os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.${this.daunroda.config.audioContainer}`);
+        const tmpAudio = (0, path_1.join)((0, os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.${this.daunroda.config.audioContainer}`);
         await this.saveTmpAudio(audioStream, tmpAudio);
         return new Promise((resolve, reject) => {
             try {
