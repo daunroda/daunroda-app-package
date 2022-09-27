@@ -20,7 +20,7 @@ jobs:
           registry-url: https://registry.yarnpkg.com/
       - name: Set Git parameters
         run: |
-          git config --global user.name daunrodo
+          git config --global user.name daunroda
           git config --global user.email contact@daunroda.cf
       - name: Install dependencies
         run: yarn --immutable
