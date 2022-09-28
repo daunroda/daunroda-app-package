@@ -98,7 +98,7 @@ export class YouTube {
           songs.push(name);
           this.daunroda.emit("debug", `"${name}" is already downloaded.`);
 
-          downloaded++;
+          downloaded += 1;
           this.daunroda.emit("progress", {
             playlist: playlist.name,
             downloaded,
