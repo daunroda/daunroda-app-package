@@ -27,6 +27,7 @@ const reject = [
 export class YouTube {
   private client!: Innertube;
   private daunroda: Daunroda;
+  private downloaded: number;
   private stopwatch = new Stopwatch().stop();
   private codec: string;
   private bitrate: string;
@@ -41,6 +42,7 @@ export class YouTube {
 
   public constructor(daunroda: Daunroda) {
     this.daunroda = daunroda;
+    this.downloaded = 0;
 
     this.codec =
       this.daunroda.config.audioContainer === "mp3"
@@ -72,11 +74,11 @@ export class YouTube {
       const notFound: Set<string> = new Set();
       const songs: string[] = [];
 
-      let downloaded = 0;
+      this.downloaded = 0;
 
       this.daunroda.emit("progress", {
         playlist: playlist.name,
-        downloaded,
+        downloaded: this.downloaded,
         total: playlist.songs.length,
         finished: false
       });
@@ -98,10 +100,10 @@ export class YouTube {
           songs.push(name);
           this.daunroda.emit("debug", `"${name}" is already downloaded.`);
 
-          downloaded += 1;
+          this.downloaded += 1;
           this.daunroda.emit("progress", {
             playlist: playlist.name,
-            downloaded,
+            downloaded: this.downloaded,
             total: playlist.songs.length,
             finished: false
           });
@@ -139,8 +141,7 @@ export class YouTube {
           destination,
           track,
           playlist.name,
-          playlist.songs.length,
-          downloaded
+          playlist.songs.length
         );
         promises.push(promise);
       }
@@ -149,7 +150,7 @@ export class YouTube {
 
       this.daunroda.emit("progress", {
         playlist: playlist.name,
-        downloaded,
+        downloaded: this.downloaded,
         total: playlist.songs.length,
         finished: true
       });
@@ -248,8 +249,7 @@ export class YouTube {
     destination: string,
     track: SpotifyApi.TrackObjectFull,
     playlist: string,
-    total: number,
-    downloaded: number
+    total: number
   ) {
     const audioStream = ytdl(`https://youtu.be/${id}`, {
       quality: "highestaudio",
@@ -324,9 +324,10 @@ export class YouTube {
         ff.on("end", async () => {
           if (tmpImg) await rm(tmpImg);
           await rm(tmpAudio);
+          this.downloaded += 1;
           this.daunroda.emit("progress", {
             playlist,
-            downloaded,
+            downloaded: this.downloaded,
             total,
             finished: false
           });
