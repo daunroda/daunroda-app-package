@@ -2,6 +2,7 @@
   "name": "daunroda",
   "version": "1.1.2",
   "license": "MIT",
+  "private": true,
   "description": "A simple yet efficient Spotify to YouTube Music Downloader",
   "author": "Alex Kovacs (alexdemaster@proton.me)",
   "main": "dist/index.js",

@@ -35,6 +35,12 @@ class YouTube {
             writable: true,
             value: void 0
         });
+        Object.defineProperty(this, "downloaded", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
         Object.defineProperty(this, "stopwatch", {
             enumerable: true,
             configurable: true,
@@ -60,6 +66,7 @@ class YouTube {
             value: []
         });
         this.daunroda = daunroda;
+        this.downloaded = 0;
         this.codec =
             this.daunroda.config.audioContainer === "mp3"
                 ? "libmp3lame"
@@ -83,10 +90,10 @@ class YouTube {
             const promises = [];
             const notFound = new Set();
             const songs = [];
-            let downloaded = 0;
+            this.downloaded = 0;
             this.daunroda.emit("progress", {
                 playlist: playlist.name,
-                downloaded,
+                downloaded: this.downloaded,
                 total: playlist.songs.length,
                 finished: false
             });
@@ -101,10 +108,10 @@ class YouTube {
                 if (await (0, fs_utils_1.exists)(destination)) {
                     songs.push(name);
                     this.daunroda.emit("debug", `"${name}" is already downloaded.`);
-                    downloaded += 1;
+                    this.downloaded += 1;
                     this.daunroda.emit("progress", {
                         playlist: playlist.name,
-                        downloaded,
+                        downloaded: this.downloaded,
                         total: playlist.songs.length,
                         finished: false
                     });
@@ -122,13 +129,13 @@ class YouTube {
                 }
                 songs.push(name);
                 // We push all the promises into an array to be able to concurrently download songs
-                const promise = this.downloadSong(result.id, destination, track, playlist.name, playlist.songs.length, downloaded);
+                const promise = this.downloadSong(result.id, destination, track, playlist.name, playlist.songs.length);
                 promises.push(promise);
             }
             await Promise.all(promises);
             this.daunroda.emit("progress", {
                 playlist: playlist.name,
-                downloaded,
+                downloaded: this.downloaded,
                 total: playlist.songs.length,
                 finished: true
             });
@@ -193,7 +200,7 @@ class YouTube {
         }
     }
     /** Downloads a song from YouTube and adds the metadata from Spotify to it */
-    async downloadSong(id, destination, track, playlist, total, downloaded) {
+    async downloadSong(id, destination, track, playlist, total) {
         var _a;
         const audioStream = (0, ytdl_core_1.default)(`https://youtu.be/${id}`, {
             quality: "highestaudio",
@@ -222,9 +229,10 @@ class YouTube {
                     if (tmpImg)
                         await (0, promises_1.rm)(tmpImg);
                     await (0, promises_1.rm)(tmpAudio);
+                    this.downloaded += 1;
                     this.daunroda.emit("progress", {
                         playlist,
-                        downloaded,
+                        downloaded: this.downloaded,
                         total,
                         finished: false
                     });
