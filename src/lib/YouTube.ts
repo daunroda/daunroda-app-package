@@ -15,7 +15,7 @@ import type { Daunroda } from "./Daunroda";
 import { ensureDir, exists } from "./fs-utils";
 import type { Processed } from "./Spotify";
 
-ffmpeg.setFfmpegPath(ffmpegPath!);
+ffmpeg.setFfmpegPath(ffmpegPath!.replace("app.asar", "app.asar.unpacked"));
 
 const reject = [
   "(live)",
