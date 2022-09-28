@@ -35,10 +35,7 @@ export class Daunroda extends EventEmitter {
       `Fetched ${`${fetchedTracks} tracks`} across ${totalPlaylists} on Spotify!`
     );
 
-    this.emit(
-      "info",
-      `Searching and downloading songs from YouTube Music...\n`
-    );
+    this.emit("info", `Searching and downloading songs from YouTube Music...`);
     await youtube.processSongs(processed);
 
     this.emit(
