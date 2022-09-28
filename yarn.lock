@@ -788,9 +788,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"daunroda-app-package@workspace:.":
+"daunroda@workspace:.":
   version: 0.0.0-use.local
-  resolution: "daunroda-app-package@workspace:."
+  resolution: "daunroda@workspace:."
   dependencies:
     "@sapphire/eslint-config": ^4.3.8
     "@sapphire/prettier-config": ^1.4.4
