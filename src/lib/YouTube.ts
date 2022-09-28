@@ -180,12 +180,12 @@ export class YouTube {
               playlist.songs.length
             } songs from the "${
               playlist.name
-            }" playlist in ${this.stopwatch.toString()}!\n`
+            }" playlist in ${this.stopwatch.toString()}!`
           : `Found and downloaded all songs (${
               playlist.songs.length
             }) from the "${
               playlist.name
-            }" playlist in ${this.stopwatch.toString()}!\n`
+            }" playlist in ${this.stopwatch.toString()}!`
       );
     }
 
@@ -195,7 +195,7 @@ export class YouTube {
       //   type: "confirm",
       //   name: "answer",
       //   default: false,
-      //   message: `\nFound ${download.name} on YouTube (named ${
+      //   message: `Found ${download.name} on YouTube (named ${
       //     download.res.name ?? download.res.title ?? ""
       //   }) but it was rejected because of ${
       //     download.reason
@@ -221,7 +221,7 @@ export class YouTube {
       //         `${sanitize(download.playlist)}.m3u8`
       //       )
       //     ).then((buff) => buff.toString());
-      //     m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
+      //     m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
       //       this.daunroda.config.audioContainer
       //     }`;
       //     await writeFile(
