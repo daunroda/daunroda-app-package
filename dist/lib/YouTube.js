@@ -14,7 +14,7 @@ const undici_1 = require("undici");
 const youtubei_js_1 = require("youtubei.js");
 const ytdl_core_1 = tslib_1.__importStar(require("ytdl-core"));
 const fs_utils_1 = require("./fs-utils");
-fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default);
+fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_static_1.default.replace("app.asar", "app.asar.unpacked"));
 const reject = [
     "(live)",
     "music video",
