@@ -29,7 +29,7 @@ class Daunroda extends stream_1.EventEmitter {
         let fetchedTracks = 0;
         processed.map((val) => (fetchedTracks += val.songs.length));
         this.emit("info", `Fetched ${`${fetchedTracks} tracks`} across ${totalPlaylists} on Spotify!`);
-        this.emit("info", `Searching and downloading songs from YouTube Music...\n`);
+        this.emit("info", `Searching and downloading songs from YouTube Music...`);
         await youtube.processSongs(processed);
         this.emit("info", `Success! Songs downloaded to ${this.config.downloadTo}.`);
     }
