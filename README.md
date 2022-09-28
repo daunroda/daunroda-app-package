@@ -8,21 +8,6 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-The Spotify to YouTube Music downloader that doesn't download all kinds of
-bullshit from YouTube (karaoke/instrumental versions, music video versions etc)
-
-## Features
-
-- Spotify metadata embedded in files
-- Playlist file creation (.m3u8)
-- Concurrent music downloading from YouTube
-
-## Requirements
-
-- [Node.js](https://nodejs.org/en/download/) (18.0.0 or newer)
-- A Spotify application (can be created for free
-  [here](https://developer.spotify.com/dashboard/applications))
-
 ## Usage
 
 - `npm i daunroda/daunroda-app-package` or `yarn add daunroda/daunroda-app-package`
