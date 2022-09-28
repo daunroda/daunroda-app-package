@@ -139,8 +139,8 @@ class YouTube {
             await (0, promises_1.writeFile)((0, path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(playlist.name)}.m3u8`), m3u8);
             const songsNotFound = notFound.size;
             this.daunroda.emit("info", songsNotFound
-                ? `Found and downloaded ${playlist.songs.length - songsNotFound}/${playlist.songs.length} songs from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!\n`
-                : `Found and downloaded all songs (${playlist.songs.length}) from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!\n`);
+                ? `Found and downloaded ${playlist.songs.length - songsNotFound}/${playlist.songs.length} songs from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!`
+                : `Found and downloaded all songs (${playlist.songs.length}) from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!`);
         }
         for (const download of this.downloadMaybe) {
             if (await (0, fs_utils_1.exists)(download.destination))
@@ -149,7 +149,7 @@ class YouTube {
             //   type: "confirm",
             //   name: "answer",
             //   default: false,
-            //   message: `\nFound ${download.name} on YouTube (named ${
+            //   message: `Found ${download.name} on YouTube (named ${
             //     download.res.name ?? download.res.title ?? ""
             //   }) but it was rejected because of ${
             //     download.reason
@@ -173,7 +173,7 @@ class YouTube {
             //         `${sanitize(download.playlist)}.m3u8`
             //       )
             //     ).then((buff) => buff.toString());
-            //     m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
+            //     m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
             //       this.daunroda.config.audioContainer
             //     }`;
             //     await writeFile(
