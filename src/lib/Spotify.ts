@@ -27,11 +27,10 @@ export class Spotify {
       if (!playlist) continue;
       const { name } = playlist.body;
       const { description } = playlist.body;
-      const image = playlist.body.images[0].url;
       const url = playlist.body.external_urls.spotify;
 
       const songs = await this.getSpotifyTracks(id);
-      processed.push({ id, name, description, image, songs, url });
+      processed.push({ id, name, description, songs, url });
     }
 
     return processed;
@@ -64,7 +63,6 @@ export interface Processed {
   id: string;
   name: string;
   description: string | null;
-  image: string;
   songs: PlaylistObject[];
   url: string;
 }
