@@ -14,7 +14,6 @@ export interface Processed {
     id: string;
     name: string;
     description: string | null;
-    image: string;
     songs: PlaylistObject[];
     url: string;
 }
