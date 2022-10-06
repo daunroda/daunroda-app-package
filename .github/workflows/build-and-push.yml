@@ -12,34 +12,9 @@ jobs:
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
-      - name: Use Node.js v18
-        uses: actions/setup-node@v3
+      - name: Build and push
+        uses: alexthemaster/action-build-typescript@v1.3.0
         with:
-          node-version: 18
-          cache: yarn
-          registry-url: https://registry.yarnpkg.com/
-      - name: Set Git parameters
-        run: |
-          git config --global user.name daunroda
-          git config --global user.email contact@daunroda.cf
-      - name: Install dependencies
-        run: yarn --immutable
-      - name: Build project
-        run: yarn build
-      - name: Clone the build branch
-        run: |
-          mkdir build
-          cd build
-          git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/daunroda/daunroda-app-package.git .
-          git checkout build
-      - name: Add files to git and commit them
-        run: |
-          rsync -r ./dist ./build 
-          rsync ./package* ./build
-          cd build
-          git add .
-          git commit -m "build: ${{ github.sha }}" || true
-      - name: Push files to GitHub
-        run: |
-            cd build
-            git push origin build || true
+            pushToBranch: true
+            branch: 'build'
+            githubToken: ${{ secrets.GITHUB_TOKEN }}
