@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { EventEmitter } from "stream";
+import { EventEmitter } from "node:stream";
 export declare class Daunroda extends EventEmitter {
     config: Config;
     constructor(config: Config);

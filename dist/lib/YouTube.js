@@ -6,9 +6,10 @@ const stopwatch_1 = require("@sapphire/stopwatch");
 const jaro_winkler_1 = require("@skyra/jaro-winkler");
 const ffmpeg_static_1 = tslib_1.__importDefault(require("ffmpeg-static"));
 const fluent_ffmpeg_1 = tslib_1.__importDefault(require("fluent-ffmpeg"));
-const promises_1 = require("fs/promises");
-const os_1 = require("os");
-const path_1 = require("path");
+const promises_1 = require("node:fs/promises");
+const node_os_1 = require("node:os");
+const node_path_1 = require("node:path");
+const promises_2 = require("node:timers/promises");
 const sanitize_filename_1 = tslib_1.__importDefault(require("sanitize-filename"));
 const undici_1 = require("undici");
 const youtubei_js_1 = require("youtubei.js");
@@ -84,9 +85,8 @@ class YouTube {
         return this;
     }
     async processSongs(processed) {
-        var _a;
         for (const playlist of processed) {
-            await (0, fs_utils_1.ensureDir)((0, path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name)));
+            await (0, fs_utils_1.ensureDir)((0, node_path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name)));
             const promises = [];
             const notFound = new Set();
             const songs = [];
@@ -103,7 +103,7 @@ class YouTube {
                     continue;
                 const { track } = song;
                 const name = `${track.artists[0].name} - ${track.name}`;
-                const destination = (0, path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`);
+                const destination = (0, node_path_1.join)(this.daunroda.config.downloadTo, (0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`);
                 // Skip searching and downloading if song is already downloaded
                 if (await (0, fs_utils_1.exists)(destination)) {
                     songs.push(name);
@@ -119,7 +119,7 @@ class YouTube {
                 }
                 this.daunroda.emit("debug", `Searching for "${name}"...`);
                 const searched = await this.client.music.search(name, { type: "song" });
-                const result = ((_a = searched === null || searched === void 0 ? void 0 : searched.results) === null || _a === void 0 ? void 0 : _a.length)
+                const result = searched?.results?.length
                     ? // Find the first result that doesn't get filtered out
                         await searched.results.map((res) => this.filter(res, name, destination, track, playlist.name, notFound))[0]
                     : null;
@@ -141,9 +141,9 @@ class YouTube {
             });
             this.stopwatch.stop();
             const m3u8 = songs
-                .map((name) => (0, path_1.join)((0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`))
+                .map((name) => (0, node_path_1.join)((0, sanitize_filename_1.default)(playlist.name), `${(0, sanitize_filename_1.default)(name)}.${this.daunroda.config.audioContainer}`))
                 .join("\n");
-            await (0, promises_1.writeFile)((0, path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(playlist.name)}.m3u8`), m3u8);
+            await (0, promises_1.writeFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(playlist.name)}.m3u8`), m3u8);
             const songsNotFound = notFound.size;
             this.daunroda.emit("info", songsNotFound
                 ? `Found and downloaded ${playlist.songs.length - songsNotFound}/${playlist.songs.length} songs from the "${playlist.name}" playlist in ${this.stopwatch.toString()}!`
@@ -152,69 +152,44 @@ class YouTube {
         for (const download of this.downloadMaybe) {
             if (await (0, fs_utils_1.exists)(download.destination))
                 continue;
-            // const { answer }: { answer: boolean } = await inquirer.prompt({
-            //   type: "confirm",
-            //   name: "answer",
-            //   default: false,
-            //   message: `Found ${download.name} on YouTube (named ${
-            //     download.res.name ?? download.res.title ?? ""
-            //   }) but it was rejected because of ${
-            //     download.reason
-            //   }. Do you want to download this https://music.youtube.com/watch?v=${
-            //     download.res.id
-            //   } anyway?`
-            // });
-            //   if (answer) {
-            //     await this.downloadSong(
-            //       download.res.id!,
-            //       download.destination,
-            //       download.track,
-            //       download.playlist,
-            //       1,
-            //       0
-            //     );
-            //     // Add newly downloaded song to playlist file
-            //     let m3u8 = await readFile(
-            //       join(
-            //         this.daunroda.config.downloadTo,
-            //         `${sanitize(download.playlist)}.m3u8`
-            //       )
-            //     ).then((buff) => buff.toString());
-            //     m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
-            //       this.daunroda.config.audioContainer
-            //     }`;
-            //     await writeFile(
-            //       join(
-            //         this.daunroda.config.downloadTo,
-            //         `${sanitize(download.playlist)}.m3u8`
-            //       ),
-            //       m3u8
-            //     );
-            //     this.daunroda.emit("progress", {
-            //       playlist: download.playlist,
-            //       downloaded: 1,
-            //       total: 1,
-            //       finished: true
-            //     });
-            //   }
+            this.daunroda.emit("downloadMaybe", download);
+            await (0, promises_2.setTimeout)(2000);
         }
+    }
+    async downloadSigle(download) {
+        this.daunroda.emit("progress", {
+            playlist: download.name,
+            downloaded: 0,
+            total: 1,
+            finished: false
+        });
+        await this.downloadSong(download.res.id, download.destination, download.track, download.playlist, 1);
+        // Add newly downloaded song to playlist file
+        let m3u8 = await (0, promises_1.readFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(download.playlist)}.m3u8`)).then((buff) => buff.toString());
+        m3u8 += `${(0, sanitize_filename_1.default)(download.playlist)}/${(0, sanitize_filename_1.default)(download.name)}.${this.daunroda.config.audioContainer}`;
+        await (0, promises_1.writeFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(download.playlist)}.m3u8`), m3u8);
+        this.daunroda.emit("progress", {
+            playlist: download.name,
+            downloaded: 1,
+            total: 1,
+            finished: true
+        });
     }
     /** Downloads a song from YouTube and adds the metadata from Spotify to it */
     async downloadSong(id, destination, track, playlist, total) {
-        var _a;
         const audioStream = (0, ytdl_core_1.default)(`https://youtu.be/${id}`, {
             quality: "highestaudio",
             highWaterMark: 1 << 25
         });
         audioStream.on("error", (err) => this.daunroda.emit("error", `There was an error whilst downloading "${track.name}" (YouTube ID: ${id}): ${err.message}`));
-        const coverUrl = (_a = track.album.images[0]) === null || _a === void 0 ? void 0 : _a.url;
+        const coverUrl = track.album.images[0]?.url;
         let tmpImg = null;
         if (coverUrl) {
             const coverStream = await (0, undici_1.request)(coverUrl).then((res) => res.body.arrayBuffer());
-            tmpImg = (0, path_1.join)((0, os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.jpg`);
+            tmpImg = (0, node_path_1.join)((0, node_os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.jpg`);
             await (0, promises_1.writeFile)(tmpImg, Buffer.from(coverStream));
         }
-        const tmpAudio = (0, path_1.join)((0, os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.${this.daunroda.config.audioContainer}`);
+        const tmpAudio = (0, node_path_1.join)((0, node_os_1.tmpdir)(), `${(Math.random() + 1).toString(36)}.${this.daunroda.config.audioContainer}`);
         await this.saveTmpAudio(audioStream, tmpAudio);
         return new Promise((resolve, reject) => {
             try {
@@ -255,7 +230,6 @@ class YouTube {
     }
     /** Filter out unwanted results */
     async filter(res, name, destination, track, playlist, notFound) {
-        var _a, _b, _c, _d, _e;
         if (!notFound.has(name))
             notFound.add(name);
         // Don't download age restricted songs or if you can't fet info on something
@@ -263,11 +237,11 @@ class YouTube {
         if (!info || info.videoDetails.age_restricted)
             return false;
         // If none of the artist names intersect or the titles aren't similar enough then reject this entry
-        if (!((_a = res.artists) === null || _a === void 0 ? void 0 : _a.some((artist) => artist.name.toLowerCase() === track.artists[0].name.toLowerCase())) ||
-            (0, jaro_winkler_1.jaroWinkler)((_c = (_b = res.title) !== null && _b !== void 0 ? _b : res.name) !== null && _c !== void 0 ? _c : "", track.name) < 0.85) {
+        if (!res.artists?.some((artist) => artist.name.toLowerCase() === track.artists[0].name.toLowerCase()) ||
+            (0, jaro_winkler_1.jaroWinkler)(res.title ?? res.name ?? "", track.name) < 0.85) {
             return null;
         }
-        const diff = this.difference(track.duration_ms / 1000, (_e = (_d = res.duration) === null || _d === void 0 ? void 0 : _d.seconds) !== null && _e !== void 0 ? _e : 0);
+        const diff = this.difference(track.duration_ms / 1000, res.duration?.seconds ?? 0);
         if (!this.daunroda.config.allowForbiddenWording &&
             (reject.some((rej) => res.title && res.title.toLowerCase().includes(rej)) ||
                 reject.some((rej) => res.name && res.name.toLowerCase().includes(rej)))) {
