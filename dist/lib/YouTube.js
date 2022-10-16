@@ -79,6 +79,7 @@ class YouTube {
                 this.daunroda.config.audioBitrate <= 320
                 ? `${this.daunroda.config.audioBitrate}k`
                 : "320k";
+        this.daunroda.on("downloadSingle", (download) => this.downloadSigle(download));
     }
     async init() {
         this.client = await youtubei_js_1.Innertube.create({});
