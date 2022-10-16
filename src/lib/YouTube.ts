@@ -6,7 +6,6 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
-import { setTimeout } from "node:timers/promises";
 import sanitize from "sanitize-filename";
 import { request } from "undici";
 import { Innertube } from "youtubei.js";
@@ -198,7 +197,6 @@ export class YouTube {
     for (const download of this.downloadMaybe) {
       if (await exists(download.destination)) continue;
       this.daunroda.emit("downloadMaybe", download);
-      await setTimeout(2000);
     }
   }
 
