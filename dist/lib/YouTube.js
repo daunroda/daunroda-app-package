@@ -9,7 +9,6 @@ const fluent_ffmpeg_1 = tslib_1.__importDefault(require("fluent-ffmpeg"));
 const promises_1 = require("node:fs/promises");
 const node_os_1 = require("node:os");
 const node_path_1 = require("node:path");
-const promises_2 = require("node:timers/promises");
 const sanitize_filename_1 = tslib_1.__importDefault(require("sanitize-filename"));
 const undici_1 = require("undici");
 const youtubei_js_1 = require("youtubei.js");
@@ -154,7 +153,6 @@ class YouTube {
             if (await (0, fs_utils_1.exists)(download.destination))
                 continue;
             this.daunroda.emit("downloadMaybe", download);
-            await (0, promises_2.setTimeout)(2000);
         }
     }
     async downloadSigle(download) {
