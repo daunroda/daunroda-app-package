@@ -22,7 +22,7 @@ export declare class YouTube {
         reason: string;
     }): Promise<void>;
     /** Downloads a song from YouTube and adds the metadata from Spotify to it */
-    downloadSong(id: string, destination: string, track: SpotifyApi.TrackObjectFull, playlist: string, total: number): Promise<void>;
+    downloadSong(id: string, destination: string, track: SpotifyApi.TrackObjectFull, playlist: string, total: number, emitProgress?: boolean): Promise<void>;
     /** Saves the audio stream from YouTube to a temporary file */
     private saveTmpAudio;
     /** Filter out unwanted results */

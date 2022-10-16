@@ -164,7 +164,7 @@ class YouTube {
         await this.downloadSong(download.res.id, download.destination, download.track, download.playlist, 1);
         // Add newly downloaded song to playlist file
         let m3u8 = await (0, promises_1.readFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(download.playlist)}.m3u8`)).then((buff) => buff.toString());
-        m3u8 += `${(0, sanitize_filename_1.default)(download.playlist)}/${(0, sanitize_filename_1.default)(download.name)}.${this.daunroda.config.audioContainer}`;
+        m3u8 += `\n${(0, sanitize_filename_1.default)(download.playlist)}/${(0, sanitize_filename_1.default)(download.name)}.${this.daunroda.config.audioContainer}`;
         await (0, promises_1.writeFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(download.playlist)}.m3u8`), m3u8);
         this.daunroda.emit("progress", {
             playlist: download.name,
@@ -174,7 +174,8 @@ class YouTube {
         });
     }
     /** Downloads a song from YouTube and adds the metadata from Spotify to it */
-    async downloadSong(id, destination, track, playlist, total) {
+    async downloadSong(id, destination, track, playlist, total, emitProgress) {
+        emitProgress = emitProgress ?? true;
         const audioStream = (0, ytdl_core_1.default)(`https://youtu.be/${id}`, {
             quality: "highestaudio",
             highWaterMark: 1 << 25
@@ -203,12 +204,14 @@ class YouTube {
                         await (0, promises_1.rm)(tmpImg);
                     await (0, promises_1.rm)(tmpAudio);
                     this.downloaded += 1;
-                    this.daunroda.emit("progress", {
-                        playlist,
-                        downloaded: this.downloaded,
-                        total,
-                        finished: false
-                    });
+                    if (emitProgress) {
+                        this.daunroda.emit("progress", {
+                            playlist,
+                            downloaded: this.downloaded,
+                            total,
+                            finished: false
+                        });
+                    }
                     resolve();
                 });
             }
