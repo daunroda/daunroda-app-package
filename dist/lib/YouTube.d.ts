@@ -13,7 +13,7 @@ export declare class YouTube {
     constructor(daunroda: Daunroda);
     init(): Promise<this>;
     processSongs(processed: Processed[]): Promise<void>;
-    downloadSigle(download: {
+    downloadSingle(download: {
         res: MusicResponsiveListItem;
         name: string;
         destination: string;

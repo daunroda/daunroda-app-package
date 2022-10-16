@@ -16,6 +16,10 @@ class Daunroda extends node_stream_1.EventEmitter {
         });
         this.config = config;
     }
+    async downloadSingle(download) {
+        const youtube = await new YouTube_1.YouTube(this).init();
+        await youtube.downloadSingle(download);
+    }
     async run() {
         const spotify = await new Spotify_1.Spotify(this);
         const youtube = await new YouTube_1.YouTube(this).init();

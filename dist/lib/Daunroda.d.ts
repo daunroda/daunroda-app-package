@@ -1,8 +1,18 @@
+/// <reference types="spotify-api" />
 /// <reference types="node" />
 import { EventEmitter } from "node:stream";
+import type MusicResponsiveListItem from "youtubei.js/dist/src/parser/classes/MusicResponsiveListItem";
 export declare class Daunroda extends EventEmitter {
     config: Config;
     constructor(config: Config);
+    downloadSingle(download: {
+        res: MusicResponsiveListItem;
+        name: string;
+        destination: string;
+        track: SpotifyApi.TrackObjectFull;
+        playlist: string;
+        reason: string;
+    }): Promise<void>;
     run(): Promise<void>;
 }
 export interface Config {
