@@ -216,7 +216,8 @@ export class YouTube {
       download.destination,
       download.track,
       download.playlist,
-      1
+      1,
+      false
     );
 
     // Add newly downloaded song to playlist file
