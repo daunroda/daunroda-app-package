@@ -161,7 +161,7 @@ class YouTube {
             total: 1,
             finished: false
         });
-        await this.downloadSong(download.res.id, download.destination, download.track, download.playlist, 1);
+        await this.downloadSong(download.res.id, download.destination, download.track, download.playlist, 1, false);
         // Add newly downloaded song to playlist file
         let m3u8 = await (0, promises_1.readFile)((0, node_path_1.join)(this.daunroda.config.downloadTo, `${(0, sanitize_filename_1.default)(download.playlist)}.m3u8`)).then((buff) => buff.toString());
         m3u8 += `\n${(0, sanitize_filename_1.default)(download.playlist)}/${(0, sanitize_filename_1.default)(download.name)}.${this.daunroda.config.audioContainer}`;
