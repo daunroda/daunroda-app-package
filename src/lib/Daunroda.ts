@@ -1,4 +1,4 @@
-import { EventEmitter } from "stream";
+import { EventEmitter } from "node:stream";
 import { ensureDir } from "./fs-utils";
 import { Spotify } from "./Spotify";
 import { YouTube } from "./YouTube";
