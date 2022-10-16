@@ -1,5 +1,5 @@
-import type { PathLike } from "fs";
-import { access, mkdir } from "fs/promises";
+import type { PathLike } from "node:fs";
+import { access, mkdir } from "node:fs/promises";
 
 /**
  * Asynchronously checks if the given path exists
