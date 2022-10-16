@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:stream";
+import type MusicResponsiveListItem from "youtubei.js/dist/src/parser/classes/MusicResponsiveListItem";
 import { ensureDir } from "./fs-utils";
 import { Spotify } from "./Spotify";
 import { YouTube } from "./YouTube";
@@ -8,6 +9,19 @@ export class Daunroda extends EventEmitter {
   public constructor(config: Config) {
     super();
     this.config = config;
+  }
+
+  public async downloadSingle(download: {
+    res: MusicResponsiveListItem;
+    name: string;
+    destination: string;
+    track: SpotifyApi.TrackObjectFull;
+    playlist: string;
+    reason: string;
+  }) {
+    const youtube = await new YouTube(this).init();
+
+    await youtube.downloadSingle(download);
   }
 
   public async run() {

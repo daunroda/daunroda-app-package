@@ -56,10 +56,6 @@ export class YouTube {
       this.daunroda.config.audioBitrate <= 320
         ? `${this.daunroda.config.audioBitrate}k`
         : "320k";
-
-    this.daunroda.on("downloadSingle", (download) =>
-      this.downloadSigle(download)
-    );
   }
 
   public async init() {
@@ -200,7 +196,7 @@ export class YouTube {
     }
   }
 
-  public async downloadSigle(download: {
+  public async downloadSingle(download: {
     res: MusicResponsiveListItem;
     name: string;
     destination: string;
