@@ -227,9 +227,10 @@ export class YouTube {
         `${sanitize(download.playlist)}.m3u8`
       )
     ).then((buff) => buff.toString());
-    m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
-      this.daunroda.config.audioContainer
-    }`;
+    m3u8 += `\n${join(
+      sanitize(download.playlist),
+      `${sanitize(download.name)}.${this.daunroda.config.audioContainer}`
+    )}`;
     await writeFile(
       join(
         this.daunroda.config.downloadTo,
