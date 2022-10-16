@@ -226,7 +226,7 @@ export class YouTube {
         `${sanitize(download.playlist)}.m3u8`
       )
     ).then((buff) => buff.toString());
-    m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
+    m3u8 += `\n${sanitize(download.playlist)}/${sanitize(download.name)}.${
       this.daunroda.config.audioContainer
     }`;
     await writeFile(
@@ -251,8 +251,11 @@ export class YouTube {
     destination: string,
     track: SpotifyApi.TrackObjectFull,
     playlist: string,
-    total: number
+    total: number,
+    emitProgress?: boolean
   ) {
+    emitProgress = emitProgress ?? true;
+
     const audioStream = ytdl(`https://youtu.be/${id}`, {
       quality: "highestaudio",
       highWaterMark: 1 << 25
@@ -327,12 +330,14 @@ export class YouTube {
           if (tmpImg) await rm(tmpImg);
           await rm(tmpAudio);
           this.downloaded += 1;
-          this.daunroda.emit("progress", {
-            playlist,
-            downloaded: this.downloaded,
-            total,
-            finished: false
-          });
+          if (emitProgress) {
+            this.daunroda.emit("progress", {
+              playlist,
+              downloaded: this.downloaded,
+              total,
+              finished: false
+            });
+          }
           resolve();
         });
       } catch (err) {
