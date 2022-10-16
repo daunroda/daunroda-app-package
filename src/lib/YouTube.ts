@@ -2,10 +2,11 @@ import { Stopwatch } from "@sapphire/stopwatch";
 import { jaroWinkler } from "@skyra/jaro-winkler";
 import ffmpegPath from "ffmpeg-static";
 import ffmpeg from "fluent-ffmpeg";
-import { rm, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Readable } from "node:stream";
+import { setTimeout } from "node:timers/promises";
 import sanitize from "sanitize-filename";
 import { request } from "undici";
 import { Innertube } from "youtubei.js";
@@ -192,55 +193,58 @@ export class YouTube {
 
     for (const download of this.downloadMaybe) {
       if (await exists(download.destination)) continue;
-      // const { answer }: { answer: boolean } = await inquirer.prompt({
-      //   type: "confirm",
-      //   name: "answer",
-      //   default: false,
-      //   message: `Found ${download.name} on YouTube (named ${
-      //     download.res.name ?? download.res.title ?? ""
-      //   }) but it was rejected because of ${
-      //     download.reason
-      //   }. Do you want to download this https://music.youtube.com/watch?v=${
-      //     download.res.id
-      //   } anyway?`
-      // });
-
-      //   if (answer) {
-      //     await this.downloadSong(
-      //       download.res.id!,
-      //       download.destination,
-      //       download.track,
-      //       download.playlist,
-      //       1,
-      //       0
-      //     );
-
-      //     // Add newly downloaded song to playlist file
-      //     let m3u8 = await readFile(
-      //       join(
-      //         this.daunroda.config.downloadTo,
-      //         `${sanitize(download.playlist)}.m3u8`
-      //       )
-      //     ).then((buff) => buff.toString());
-      //     m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
-      //       this.daunroda.config.audioContainer
-      //     }`;
-      //     await writeFile(
-      //       join(
-      //         this.daunroda.config.downloadTo,
-      //         `${sanitize(download.playlist)}.m3u8`
-      //       ),
-      //       m3u8
-      //     );
-
-      //     this.daunroda.emit("progress", {
-      //       playlist: download.playlist,
-      //       downloaded: 1,
-      //       total: 1,
-      //       finished: true
-      //     });
-      //   }
+      this.daunroda.emit("downloadMaybe", download);
+      await setTimeout(2000);
     }
+  }
+
+  public async downloadSigle(download: {
+    res: MusicResponsiveListItem;
+    name: string;
+    destination: string;
+    track: SpotifyApi.TrackObjectFull;
+    playlist: string;
+    reason: string;
+  }) {
+    this.daunroda.emit("progress", {
+      playlist: download.name,
+      downloaded: 0,
+      total: 1,
+      finished: false
+    });
+
+    await this.downloadSong(
+      download.res.id!,
+      download.destination,
+      download.track,
+      download.playlist,
+      1
+    );
+
+    // Add newly downloaded song to playlist file
+    let m3u8 = await readFile(
+      join(
+        this.daunroda.config.downloadTo,
+        `${sanitize(download.playlist)}.m3u8`
+      )
+    ).then((buff) => buff.toString());
+    m3u8 += `${sanitize(download.playlist)}/${sanitize(download.name)}.${
+      this.daunroda.config.audioContainer
+    }`;
+    await writeFile(
+      join(
+        this.daunroda.config.downloadTo,
+        `${sanitize(download.playlist)}.m3u8`
+      ),
+      m3u8
+    );
+
+    this.daunroda.emit("progress", {
+      playlist: download.name,
+      downloaded: 1,
+      total: 1,
+      finished: true
+    });
   }
 
   /** Downloads a song from YouTube and adds the metadata from Spotify to it */
